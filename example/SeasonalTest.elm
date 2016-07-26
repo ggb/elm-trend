@@ -1,6 +1,7 @@
 module SeasonalTest exposing (..)
 
 import Seasonal
+import Regression
 import Svg exposing (svg)
 import Svg.Attributes exposing (width, height)
 import Chart exposing (Scale, Data)
@@ -12,6 +13,15 @@ data = [
     498, 387, 473, 513, 582, 474,
     544, 582, 681, 557, 628, 707,
     773, 592, 627, 725, 854, 661 ] 
+
+trend =
+  let
+    fun =
+      List.indexedMap (\index val -> (toFloat index, toFloat val)) data
+      |> Regression.linear
+  in
+    List.map fun [1..30]
+    |> List.indexedMap (\index val -> (index + 1 |> toFloat, val, []))
 
 
 renderData : Data msg
@@ -25,11 +35,12 @@ forecast =
   |> Seasonal.calculate 4 6
   |> Maybe.withDefault []
   |> List.indexedMap (\index val -> (index + 1 |> toFloat, val, []))
-  |> Debug.log "forecast"
+  |> List.drop 24
+
 
 xScale : Scale
 xScale x =
-  20 + x * 20
+  15 + x * 15
 
 
 yScale : Scale
@@ -46,7 +57,7 @@ main =
     [
       lineChart
         [
-          LineChart.color "#7E94C7"
+          LineChart.color "#9fee00"
         ]
         { data = renderData
         , xScale = xScale
@@ -54,9 +65,17 @@ main =
         },
       lineChart
         [
-          LineChart.color "pink"
+          LineChart.color "#ff0000"
         ]
         { data = forecast
+        , xScale = xScale
+        , yScale = yScale
+        },
+      lineChart
+        [
+          LineChart.color "#009999"
+        ]
+        { data = trend
         , xScale = xScale
         , yScale = yScale
         }
