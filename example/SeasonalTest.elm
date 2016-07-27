@@ -1,7 +1,7 @@
 module SeasonalTest exposing (..)
 
 import Seasonal
-import Regression
+import Trend
 import Svg exposing (svg)
 import Svg.Attributes exposing (width, height)
 import Chart exposing (Scale, Data)
@@ -18,7 +18,7 @@ trend =
   let
     fun =
       List.indexedMap (\index val -> (toFloat index, toFloat val)) data
-      |> Regression.linear
+      |> Trend.linear
   in
     List.map fun [1..30]
     |> List.indexedMap (\index val -> (index + 1 |> toFloat, val, []))
@@ -32,7 +32,7 @@ renderData =
 forecast : Data msg
 forecast = 
   data 
-  |> Seasonal.calculate 4 6
+  |> Seasonal.calculate 4
   |> Maybe.withDefault []
   |> List.indexedMap (\index val -> (index + 1 |> toFloat, val, []))
   |> List.drop 24

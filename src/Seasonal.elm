@@ -1,4 +1,4 @@
-module Seasonal exposing (..)
+module Seasonal exposing (calculate, calculateWith)
 
 import Array
 
@@ -7,14 +7,14 @@ initialTrend : Int -> List Float -> Float
 initialTrend period data =
   let
     period' = toFloat period
-    indexed = Array.fromList data 
-    sum = 
+    indexed = Array.fromList data
+    sum =
       indexed
       |> Array.slice 0 period
-      |> Array.indexedMap 
-          (\index value -> 
-              Array.get (index + period) indexed 
-              |> Maybe.map (\ele -> ele - value) 
+      |> Array.indexedMap
+          (\index value ->
+              Array.get (index + period) indexed
+              |> Maybe.map (\ele -> ele - value)
               |> Maybe.withDefault 0.0)
       |> Array.foldr (+) 0
   in
@@ -30,7 +30,7 @@ split' period data result =
       chunk = List.take period data
       rest  = List.drop period data
     in
-      split' period rest (chunk :: result) 
+      split' period rest (chunk :: result)
 
 
 split : Int -> List Float -> List (List Float)
@@ -40,7 +40,7 @@ split period data =
 
 avgLists : Int -> List (List Float) -> List Float
 avgLists period =
-  List.map 
+  List.map
     (\l -> (List.sum l) / (toFloat period))
 
 
@@ -52,21 +52,21 @@ avgObservations period data avgs =
 
 listUnzip : List (List a) -> List (List a)
 listUnzip l =
-  let 
-    innerLength = 
-      List.head l 
-      |> Maybe.withDefault [] 
+  let
+    innerLength =
+      List.head l
+      |> Maybe.withDefault []
       |> List.length
-    init = 
+    init =
       List.map (\i -> []) [0..innerLength]
-  in 
+  in
     List.foldr (List.map2 (::)) init l
 
 
 seasonalIndices : Int -> Int -> List Float -> List Float
 seasonalIndices period seasons data =
-  split period data 
-  |> avgLists period 
+  split period data
+  |> avgLists period
   |> avgObservations period data
   |> split period
   |> listUnzip
@@ -80,7 +80,7 @@ check alpha beta gamma m period =
   in
     if m <= 0 || m > period || List.any notBetweenZeroAndOne [alpha, beta, gamma] then
       False
-    else 
+    else
       True
 
 levelSmoothing
@@ -127,17 +127,17 @@ calculateHoltWinters'
     -> List Float
     -> List Float
     -> List Float
-calculateHoltWinters' alpha beta gamma period m it last_st last_bt index data result = 
+calculateHoltWinters' alpha beta gamma period m it last_st last_bt index data result =
   case data of
     (value::rest) ->
       let
-        getWithDefault i a = Array.get i a |> Maybe.withDefault 0.0 
+        getWithDefault i a = Array.get i a |> Maybe.withDefault 0.0
         st = levelSmoothing alpha period (getWithDefault (index - period) it) index value last_st last_bt
         bt = trendSmoothing gamma last_st last_bt st
-        it' = 
+        it' =
           if index - period >= 0 then
             getWithDefault (index - period) it
-            |> seasonalSmoothing beta value st 
+            |> seasonalSmoothing beta value st
             |> (flip Array.push) it
           else
             it
@@ -156,7 +156,7 @@ calculateHoltWinters alpha beta gamma period m initTrend seasonal data =
     it = Array.fromList seasonal
   in
     calculateHoltWinters' alpha beta gamma period m it firstObs initTrend 2 restObs []
-  
+
 
 calculateWith : Float -> Float -> Float -> Int -> Int -> List Float -> Maybe (List Float)
 calculateWith alpha beta gamma m period data =
@@ -164,17 +164,17 @@ calculateWith alpha beta gamma m period data =
     let
       len = List.length data
       seasons = round (toFloat len / toFloat period)
-      seasonal = seasonalIndices period 6 data
-      initTrend = initialTrend period data      
+      seasonal = seasonalIndices period seasons data
+      initTrend = initialTrend period data
     in
       calculateHoltWinters alpha beta gamma period m initTrend seasonal data
       |> List.reverse
-      |> (++) (List.repeat 6 0)
+      |> (++) (List.repeat (m + 2) 0)
       |> Just
   else
     Nothing
 
 
-calculate : Int -> Int -> List Float -> Maybe (List Float)
-calculate =
-  calculateWith 0.5 0.4 0.6
+calculate : Int -> List Float -> Maybe (List Float)
+calculate period =
+  calculateWith 0.5 0.4 0.6 period period

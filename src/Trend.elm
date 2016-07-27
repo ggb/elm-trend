@@ -1,4 +1,4 @@
-module Regression exposing (..)
+module Trend exposing (..)
 
 
 linear : List (Float, Float) -> (Float -> Float)
