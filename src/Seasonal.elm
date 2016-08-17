@@ -1,4 +1,9 @@
-module Seasonal exposing (calculate, calculateWith)
+module Seasonal exposing (forecast, forecastWith)
+
+{-| Contains functions to create a seasonal forecast based on the Holt-Winters method for seasonal forecasting.
+
+@docs forecast, forecastWith
+-}
 
 import Array
 
@@ -158,8 +163,17 @@ calculateHoltWinters alpha beta gamma period m initTrend seasonal data =
     calculateHoltWinters' alpha beta gamma period m it firstObs initTrend 2 restObs []
 
 
-calculateWith : Float -> Float -> Float -> Int -> Int -> List Float -> Maybe (List Float)
-calculateWith alpha beta gamma m period data =
+{-| Creates a seasonal forecast. Set the following parameters:
+
+* alpha: overall smoothing parameter (between 0 and 1)
+* beta: seasonal smoothing parameter (between 0 and 1)
+* gamma: trend smoothing parameter (between 0 and 1)
+* m: number of values to forecast (between 0 and period)
+* period: values per season (length of period) in the historical data
+* data: list of float values with historical data
+-}
+forecastWith : Float -> Float -> Float -> Int -> Int -> List Float -> Maybe (List Float)
+forecastWith alpha beta gamma m period data =
   if check alpha beta gamma m period && List.length data > 0 then
     let
       len = List.length data
@@ -174,7 +188,8 @@ calculateWith alpha beta gamma m period data =
   else
     Nothing
 
-
-calculate : Int -> List Float -> Maybe (List Float)
-calculate period =
-  calculateWith 0.5 0.4 0.6 period period
+{-| Creates a forecast with default parameters (alpha = 0.5, beta = 0.4, gamma = 0.6, number of forecasted values = length of period). You only need to specify the length of a season (number of values per season). 
+-}
+forecast : Int -> List Float -> Maybe (List Float)
+forecast period =
+  forecastWith 0.5 0.4 0.6 period period
