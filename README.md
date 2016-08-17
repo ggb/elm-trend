@@ -2,11 +2,9 @@
 
 Calculate trend lines and forecast based on seasonal data.
 
-![alt text](https://github.com/ggb/elm-trend/blob/master/trends.png "Trend line and seasonal trends")
+![The github-page shows a nice example chart.](https://github.com/ggb/elm-trend/blob/master/trends.png "Green: Actual Data; Blue: Trend Line; Red: Seasonal Forecast")
 
-**Green**: Actual Data; **Blue**: Trend Line; **Red**: Seasonal Forecast
-
-The graph was created with [wuct/elm-charts](http://package.elm-lang.org/packages/wuct/elm-charts/latest). 
+The chart was created with [wuct/elm-charts](http://package.elm-lang.org/packages/wuct/elm-charts/latest). 
 
 ## Installation
 

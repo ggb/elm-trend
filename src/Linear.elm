@@ -47,9 +47,8 @@ forecast m points =
       |> List.head
       |> Maybe.withDefault (0,0)
     range = 
-      [lastX, lastX + m]
+      [(lastX + 1) .. (lastX + m)]
       |> List.map toFloat 
   in
     List.map regressionFunction range
     |> List.map2 (,) range
-      
