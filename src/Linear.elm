@@ -5,6 +5,14 @@ module Linear exposing (regression, forecast)
 @docs regression, forecast
 -}
 
+
+fold_helper points =
+  List.foldr 
+    (\(x, y) ((x_sumi, y_sumi), (x_sqri, xTimesyi)) ->
+        ((x_sumi + x, y_sumi + y), (x_sqri + x * x, xTimesyi + x * y)))    
+    ((0, 0), (0, 0)) points
+
+
 {-| Expects a list of Float-tuples, where the first element is the x- and the second element is the y-coordinate of a point. It returns a linear function, that gets a Float and emits new values.
 
     vals = [(0, 0), (1, 0.5), (2, 1), (3, 1.5)]
@@ -16,12 +24,7 @@ regression : List (Float, Float) -> (Float -> Float)
 regression points =
   let
     len = List.length points |> toFloat
-    (x_sum, y_sum, x_sqr, xTimesy) =
-      List.foldr 
-        (\(x, y) (x_sum, y_sum, x_sqr, xTimesy) -> 
-          (x_sum + x, y_sum + y, x_sqr + x * x, xTimesy + x * y)
-        )    
-        (0, 0, 0, 0) points
+    ((x_sum, y_sum), (x_sqr, xTimesy)) = fold_helper points
     m = (len * xTimesy - x_sum * y_sum) / (len * x_sqr - x_sum * x_sum)
     b = (y_sum / len) - (m * x_sum) / len
     fun x = x * m + b
@@ -53,4 +56,4 @@ forecast m points =
       |> List.map toFloat 
   in
     List.map regressionFunction range
-    |> List.map2 (,) range
+    |> List.map2 Tuple.pair range

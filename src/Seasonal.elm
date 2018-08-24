@@ -122,6 +122,9 @@ generateForcast st m bt crazy_it =
   (st + (toFloat m * bt)) * crazy_it
 
 
+flip : (b -> a -> c) -> a -> b -> c
+flip f x y = f y x
+      
 calculateHoltWinters_
     : Float
     -> Float
