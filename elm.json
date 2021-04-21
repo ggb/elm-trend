@@ -3,7 +3,7 @@
     "name": "ggb/elm-trend",
     "summary": "Regression and time series forecasting",
     "license": "MIT",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "exposed-modules": [
         "Linear",
         "Seasonal"
